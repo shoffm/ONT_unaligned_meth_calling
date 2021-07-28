@@ -1,0 +1,73 @@
+import glob 
+import re
+
+#load guppy in the conda environment file is run in
+
+# ---------------- CHANGE these variables to match the project -------------
+
+#list input file directory (after subsetting to desired reads)
+infiles_path = '/data/hoffmansf/read_isolation/fast5_subset_output/*' #something you can ls to get everything you want (directories), full path
+sub_string = '/data/hoffmansf/read_isolation/fast5_subset_output/'  #something that extracts just what you want from the infiles_path
+
+#list output file directory 
+outfiles_path = '/data/Phillippy/projects/hoffmansf/snakemake_out/mingrid/'
+
+#guppy config file and location
+guppy_config = 'res_dna_r941_min_modbases_5mC_v001.cfg'
+#guppy_config_path = '/home/hoffmansf/rDNA_meth2/rerio/basecall_models'
+
+# ---------------------------------------------------------------------------
+
+# generate strings used later in the script
+infile = sub_string + "{smp}" #something that makes the file the wildcard
+outfile_guppy = outfiles_path + "guppy_output/{smp}/output/workspace/batch0.fast5"
+outpath_guppy = outfiles_path + "guppy_output/{wildcards.smp}/output/"
+outfile_bams = outfiles_path + "bams/{smp}.bam"
+outpath_bams = outfiles_path + "bams/{wildcards.smp}.bam"
+outfile_merged_bam = outfiles_path + "all.bam"
+
+# get list of input files
+infiles = glob.glob(infiles_path) #lists files in the directory, ls
+
+#get list of sample names
+samps = [re.sub(sub_string, '',x) for x in infiles] #generates the samples
+
+#final output files 
+#output folder for each fast5 file/files that are in there
+rule all: 
+  input:
+    outfile_merged_bam
+
+
+#run guppy on each of the fast5 files
+rule run_guppy: 
+  input:
+    infile=infile,
+    outfiles_path=outfiles_path
+  output:
+    outfile_guppy
+  shell:
+    "inpath={input.infile};"
+    "outpath_guppy={input.outfiles_path}/guppy_output/{wildcards.smp}/output/;"
+    "guppy_basecaller --save_path $outpath_guppy --input_path $inpath --compress_fastq --fast5_out --data_path {guppy_config_path} --config {guppy_config};"
+    
+
+#run guppy2sam
+rule run_guppy2sam:
+  input:
+    outfile_guppy=outfile_guppy,
+    outfiles_path=outfiles_path
+  output:
+    outfile_bams
+  shell:
+    "outpath_bams={input.outfiles_path}/bams/{wildcards.smp}.bam;"
+    "fast5mod guppy2sam {input.outfile_guppy} --workers 74 --recursive | samtools sort -@ 8 | samtools view -b -@ 8 > $outpath_bams;"
+
+#merge all of the bam files together
+rule merge: 
+  input:
+    expand(outfile_bams,smp=samps)
+  output:
+    outfile_merged_bam
+  shell:
+    "samtools cat {input} -o {outfile_merged_bam}"
