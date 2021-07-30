@@ -70,7 +70,7 @@ The guppy command we use in the snakefile (where `$` indicates a variable that y
 guppy_basecaller --save_path $outpath_guppy --input_path $inpath_fast5_directory --compress_fastq --fast5_out --data_path $guppy_config_path --config $guppy_config; 
 ```
 
-### b. Generate unaligned bam files with methylation probabilities from fast5 files using `guppy2sam`
+### b. Generate unaligned bam files with methylation probabilities from fast5 files using [guppy2sam](https://github.com/nanoporetech/fast5mod#usage)
 `guppy2sam` allows you to convert a bam file from a fast5 file. 
 The `guppy2sam` command we use in the snakefile (where `$` indicates a variable that you should change to suit your analysis): 
 ```
