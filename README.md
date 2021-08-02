@@ -110,7 +110,7 @@ The unaligned bam file generated will have:
 - Header
 - Sequence
 - Quality scores
-- Methylation probabilities, tags for these sections will differ depending on which rerio model was used. I called 5mC, so the tag I wanted was MC:B:C. In this segment there are numbers between 0-255 which represent the probability that given a C was called, it was a methylated. 0 represents a 0% chance of 5mC, 255 represents a 100% chance of 5mC, and anything in between represents a (n/255)(100)% chance of 5mC. 
+- Methylation probabilities, tags for these sections will differ depending on which rerio model was used. I called 5mC, so the tag I wanted was MC. In this segment there are numbers between 0-255 which represent the probability that given a C was called, it was a methylated. 0 represents a 0% chance of 5mC, 255 represents a 100% chance of 5mC, and anything in between represents a (n/255)(100)% chance of 5mC. 
 
 ## Navigating multiple sequencing platforms
 Notes to handle reads from both MinION/GridION and PromethION: 
